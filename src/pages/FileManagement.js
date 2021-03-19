@@ -1,18 +1,74 @@
 import React, { useEffect, useState } from 'react'
-/* import Button from '../components/Button' */
-import Select from 'react-select'
-
-import { initCOCO2Chart } from '../components/Charts/COCO2Chart'
-
 import axios from 'axios'
-
-import { Dialog } from '@reach/dialog'
-import '@reach/dialog/styles.css'
-
+import Select from 'react-select'
 import Fade from 'react-reveal/Fade'
-import { Container, Button, Typography } from '@material-ui/core'
+import { initCOCO2Chart } from '../components/Charts/COCO2Chart'
+import { buttonError, buttonStatus, buttonSuccess } from '../components/Button'
+import {
+  Button,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  makeStyles,
+  Grid,
+  Divider,
+  Box,
+} from '@material-ui/core'
+
+const useStyles = makeStyles(() => ({
+  root: {
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'flex-start',
+  },
+  select: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    border: '1px solid blue',
+    '&:hover': {
+      cursor: 'pointer',
+    },
+  },
+  buttonError: buttonError,
+  buttonStatus: buttonStatus,
+  buttonSuccess: buttonSuccess,
+  chartBox: { display: 'flex', width: '100%', justifyContent: 'center' },
+  chart: {
+    maxWidth: '1280px',
+  },
+}))
+
+const selectStyles = {
+  control: (styles) => ({
+    ...styles,
+    backgroundColor: 'white',
+    cursor: 'pointer',
+    ':hover': {
+      borderRadius: '4px',
+      borderColor: 'rgba(24, 144, 255, 0.4)',
+      backgroundColor: 'rgba(24, 144, 255, 0.1)',
+    },
+  }),
+  option: (styles, { data, isDisabled, isSelected }) => {
+    return {
+      ...styles,
+      cursor: isDisabled ? 'not-allowed' : 'pointer',
+
+      ':active': {
+        ...styles[':active'],
+        backgroundColor: !isDisabled && (isSelected ? data.color : 'white'),
+      },
+    }
+  },
+}
 
 const FileManagement = () => {
+  const classes = useStyles()
+
   const [datas, setDatas] = useState([])
   const [selectedFile, setSelectedFile] = useState('')
   const [fileStatus, setFileStatus] = useState('')
@@ -47,7 +103,7 @@ const FileManagement = () => {
     datas.map((data) => setOptionsForSelect((prevState) => [...prevState, { value: data, label: data.name }]))
   }
 
-  const handleOnClick = (selectedStatus) => {
+  const handleOnStatusClick = (selectedStatus) => {
     axios
       .post(`http://localhost:8082/api/upload/set-status/${selectedFile._id}`, { status: selectedStatus })
       .then((response) => {
@@ -61,55 +117,57 @@ const FileManagement = () => {
   }
 
   return (
-    <Container maxWidth="xl">
-      <Typography gutterBottom>Select files from database</Typography>
-      <Select
-        isClearable
-        isSearchable
-        options={optionsForSelect}
-        onChange={(value) => setSelectedFile(value === null ? '' : value.value)}
-      />
-      {/* <Menu>
-        <MenuButton className="mr-4 px-4 py-2 border">
-          {selectedFile.name || 'Select File'} <span aria-hidden>▾</span>
-        </MenuButton>
-        <MenuList>
-          {datas.map((data) => (
-            <MenuItem key={data.name} onSelect={() => setSelectedFile(data)}>
-              {data.name}
-            </MenuItem>
-          ))}
-        </MenuList>
-      </Menu> */}
-      <Fade when={selectedFile}>
-        <Button variant="outlined" color="primary" onClick={() => handleOnClick('Vyhovujúci')}>
+    <Grid container className={classes.root} spacing={2}>
+      <Grid item xs={12}>
+        <Typography gutterBottom>Select files from database</Typography>
+        <Divider />
+      </Grid>
+
+      <Grid item xs={10} sm={5} md={4} lg={2}>
+        <Select
+          isClearable
+          isSearchable
+          styles={selectStyles}
+          options={optionsForSelect}
+          onChange={(value) => setSelectedFile(value === null ? '' : value.value)}
+        ></Select>
+      </Grid>
+
+      <Grid item xs={12} sm={12} md={8} lg={10}>
+        <Button className={classes.buttonSuccess} variant="contained" onClick={() => handleOnStatusClick('Vyhovujúci')}>
           Correct
         </Button>
-        <Button variant="outlined" color="primary" onClick={() => handleOnClick('Nevyhovujúci')}>
+        <Button className={classes.buttonError} variant="contained" onClick={() => handleOnStatusClick('Nevyhovujúci')}>
           InCorrect
         </Button>
-        <Button variant="outlined" color="primary">
-          {fileStatus || 'File Status'}
+        <Button className={classes.buttonStatus} variant="contained">
+          File status: {fileStatus || ''}
         </Button>
-      </Fade>
+      </Grid>
 
-      <Dialog
-        className="flex-col w-80 text-center items-center"
-        aria-label="label"
-        isOpen={showDialog}
-        onDismiss={() => setShowDialog(false)}
-      >
-        <p className="pb-2 text-center">Status was changed successfully.</p> <hr />
-        <Button className="px-4 py-1 mt-2 border close-button" onClick={() => setShowDialog(false)}>
-          Okey
-        </Button>
-      </Dialog>
+      <Box className={classes.chartBox}>
+        <Grid item xs={12} className={classes.chart}>
+          <canvas
+            id="myChartCOCO2"
+            style={selectedFile === '' ? { visibility: 'hidden' } : { visibility: 'visible' }}
+          ></canvas>
 
-      <canvas
-        id="myChartCOCO2"
-        className={`${selectedFile === '' ? 'hidden' : 'visible'} min-w-380 min-h-380 `}
-      ></canvas>
-    </Container>
+          <Dialog open={showDialog} onClose={() => setShowDialog(false)} aria-labelledby="customized-dialog-title">
+            <DialogTitle id="alert-dialog-title">{'Status changed'}</DialogTitle>
+            <DialogContent dividers>
+              <DialogContentText style={{ margin: 0 }} id="alert-dialog-description">
+                File status was successfully changed!
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setShowDialog(false)} color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </Grid>
+      </Box>
+    </Grid>
   )
 }
 

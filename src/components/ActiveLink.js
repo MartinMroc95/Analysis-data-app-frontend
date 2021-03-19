@@ -41,7 +41,9 @@ function ActiveLink({ to, name, icon, color }) {
     >
       <FontAwesomeIcon
         icon={icon}
-        className={`pr-0  w-5 h-5 min-w-32 md:pr-3 ${location.pathname === to ? switchTextColor(color) : 'text-white'} `}
+        className={`pr-0  w-5 h-5 min-w-32 md:pr-3 ${
+          location.pathname === to ? switchTextColor(color) : 'text-white'
+        } `}
       ></FontAwesomeIcon>
       <span
         className={`pb-1 md:pb-0 text-xs md:text-base  ${

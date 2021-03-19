@@ -4,12 +4,14 @@ import { chartOptions } from './DefaultSettings'
 export const renderCOCO2Chart = (data) => {
   chartOptions()
 
+  let backgroundColor = getRandomColor()
+
   window.chart.data.datasets.push({
     data,
     label: 'k4_co + k4_co2',
     fill: false,
-    backgroundColor: getRandomColor(),
-    borderColor: 'transparent',
+    backgroundColor: backgroundColor,
+    borderColor: backgroundColor,
     borderWidth: 1,
   })
 
