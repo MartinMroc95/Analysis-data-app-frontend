@@ -1,8 +1,27 @@
 import React, { useState } from 'react'
 import { SheetJSFT } from '../utils/types'
+
+import { Button, Container, Divider, makeStyles, Typography } from '@material-ui/core'
+import CloudUploadIcon from '@material-ui/icons/CloudUpload'
+
 import axios from 'axios'
 
+const useStyles = makeStyles((theme) => ({
+  input: {
+    display: 'none',
+  },
+  divider: {
+    width: '300px',
+    padding: '0 0 1px 0',
+  },
+  button: {
+    margin: '10px 10px 0 0',
+  },
+}))
+
 export default function Reader() {
+  const classes = useStyles()
+
   const [state, setState] = useState('')
   const [disabled, setDisabled] = useState(true)
 
@@ -32,25 +51,39 @@ export default function Reader() {
   }
 
   return (
-    <div>
-      <h1>Vyberte súbor vo formáte .xls alebo .xlsx </h1>
-      <hr />
-      <br />
+    <Container maxWidth="xl">
+      <Typography gutterBottom>
+        Vyberte súbor vo formáte .xls alebo .xlsx{' '}
+      </Typography>
+      <Divider className={classes.divider} />
       <input
-        type="file"
-        className="form-control cursor-pointer"
-        id="file"
         accept={SheetJSFT}
-        onChange={handleChange}
+        className={classes.input}
+        id="contained-button-file"
         multiple
+        type="file"
+        onChange={handleChange}
       />
-      <input
-        disabled={disabled}
-        className={`px-5 py-2 ${disabled ? 'bg-myGray' : 'bg-buttonColor'}  text-black cursor-pointer`}
-        type="submit"
-        value="Upload"
-        onClick={handleSubmission}
-      />
-    </div>
+      <label htmlFor="contained-button-file">
+        <Button
+          className={classes.button}
+          variant="contained"
+          color="primary"
+          component="span"
+          startIcon={<CloudUploadIcon />}
+        >
+          Choose files
+        </Button>
+        <Button
+          className={classes.button}
+          color="primary"
+          variant="outlined"
+          onClick={handleSubmission}
+          disabled={disabled}
+        >
+          Upload files
+        </Button>
+      </label>
+    </Container>
   )
 }

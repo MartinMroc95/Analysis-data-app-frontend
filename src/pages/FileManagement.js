@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from 'react'
-import Button from '../components/Button'
+/* import Button from '../components/Button' */
+import Select from 'react-select'
 
 import { initCOCO2Chart } from '../components/Charts/COCO2Chart'
 
 import axios from 'axios'
 
-import { Menu, MenuList, MenuButton, MenuItem, MenuItems, MenuPopover, MenuLink } from '@reach/menu-button'
-import '@reach/menu-button/styles.css'
-import { Dialog, DialogOverlay, DialogContent } from '@reach/dialog'
+import { Dialog } from '@reach/dialog'
 import '@reach/dialog/styles.css'
 
 import Fade from 'react-reveal/Fade'
+import { Container, Button, Typography } from '@material-ui/core'
 
-const FileManagment = () => {
+const FileManagement = () => {
   const [datas, setDatas] = useState([])
   const [selectedFile, setSelectedFile] = useState('')
   const [fileStatus, setFileStatus] = useState('')
   const [showDialog, setShowDialog] = useState(false)
+  const [optionsForSelect, setOptionsForSelect] = useState([])
 
   useEffect(() => {
     setFileStatus(selectedFile.status)
@@ -38,6 +39,14 @@ const FileManagment = () => {
       })
   }, [])
 
+  useEffect(() => {
+    setOptions()
+  }, [datas])
+
+  const setOptions = () => {
+    datas.map((data) => setOptionsForSelect((prevState) => [...prevState, { value: data, label: data.name }]))
+  }
+
   const handleOnClick = (selectedStatus) => {
     axios
       .post(`http://localhost:8082/api/upload/set-status/${selectedFile._id}`, { status: selectedStatus })
@@ -52,9 +61,15 @@ const FileManagment = () => {
   }
 
   return (
-    <section>
-      <h1>Select files from database</h1>
-      <Menu>
+    <Container maxWidth="xl">
+      <Typography gutterBottom>Select files from database</Typography>
+      <Select
+        isClearable
+        isSearchable
+        options={optionsForSelect}
+        onChange={(value) => setSelectedFile(value === null ? '' : value.value)}
+      />
+      {/* <Menu>
         <MenuButton className="mr-4 px-4 py-2 border">
           {selectedFile.name || 'Select File'} <span aria-hidden>▾</span>
         </MenuButton>
@@ -65,39 +80,37 @@ const FileManagment = () => {
             </MenuItem>
           ))}
         </MenuList>
-      </Menu>
+      </Menu> */}
       <Fade when={selectedFile}>
-        <button className="px-4 py-2 mr-4 bg-buttonColor text-background" onClick={() => handleOnClick('Vyhovujúci')}>
+        <Button variant="outlined" color="primary" onClick={() => handleOnClick('Vyhovujúci')}>
           Correct
-        </button>
-        <button className="px-4 py-2 mr-4 bg-buttonColor text-background" onClick={() => handleOnClick('Nevyhovujúci')}>
+        </Button>
+        <Button variant="outlined" color="primary" onClick={() => handleOnClick('Nevyhovujúci')}>
           InCorrect
-        </button>
-        <button className="px-4 py-2 mr-4 border text-background">{fileStatus || 'File Status'}</button>
+        </Button>
+        <Button variant="outlined" color="primary">
+          {fileStatus || 'File Status'}
+        </Button>
       </Fade>
 
-      <Fade top when={showDialog}>
-        <Dialog
-          className="flex-col w-80 text-center items-center"
-          aria-label="label"
-          isOpen={showDialog}
-          onDismiss={() => setShowDialog(false)}
-        >
-          <p className="pb-2 text-center">Status was changed successfully.</p> <hr />
-          <button className="px-4 py-1 mt-2 border close-button" onClick={() => setShowDialog(false)}>
-            Okey
-          </button>
-        </Dialog>
-      </Fade>
+      <Dialog
+        className="flex-col w-80 text-center items-center"
+        aria-label="label"
+        isOpen={showDialog}
+        onDismiss={() => setShowDialog(false)}
+      >
+        <p className="pb-2 text-center">Status was changed successfully.</p> <hr />
+        <Button className="px-4 py-1 mt-2 border close-button" onClick={() => setShowDialog(false)}>
+          Okey
+        </Button>
+      </Dialog>
 
       <canvas
         id="myChartCOCO2"
         className={`${selectedFile === '' ? 'hidden' : 'visible'} min-w-380 min-h-380 `}
-        height="183"
-        width="400"
       ></canvas>
-    </section>
+    </Container>
   )
 }
 
-export default FileManagment
+export default FileManagement
