@@ -1,7 +1,6 @@
 import Chart from 'chart.js'
 
 import { defaultSettings } from './DefaultSettings'
-import { renderCOCO2Chart } from './RenderFunctions'
 
 export const createNewChart = (element, text, yAxesLabel, xAxesLabel, displayLegend) => {
   const defaultElementChart = element.cloneNode()

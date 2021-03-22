@@ -12,7 +12,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'none',
   },
   divider: {
-    width: '300px',
+    maxWidth: '300px',
     padding: '0 0 1px 0',
   },
   button: {

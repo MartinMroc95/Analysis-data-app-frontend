@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import Select from 'react-select'
 import { buttonError, buttonStatus, buttonSuccess } from '../components/Button'
 import {
   Button,
@@ -15,6 +14,11 @@ import {
   Divider,
   Box,
 } from '@material-ui/core'
+import MultiSelect from 'react-multi-select-component'
+
+import { getRandomColor } from '../utils/randomColor'
+import { renderChart } from '../components/Charts/RenderFunctions'
+import { createNewChart } from '../components/Charts/Graphs'
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -23,46 +27,25 @@ const useStyles = makeStyles(() => ({
     justifyContent: 'flex-start',
   },
   select: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start',
-    border: '1px solid blue',
-    '&:hover': {
+    '& :hover ': {
       cursor: 'pointer',
     },
   },
   buttonError: buttonError,
   buttonStatus: buttonStatus,
   buttonSuccess: buttonSuccess,
-  chartBox: { display: 'flex', width: '100%', justifyContent: 'center' },
+  chartBox: {
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center',
+  },
   chart: {
-    maxWidth: '1280px',
+    justifyContent: 'center',
+    width: '100%',
   },
 }))
-
-const selectStyles = {
-  control: (styles) => ({
-    ...styles,
-    backgroundColor: 'white',
-    cursor: 'pointer',
-    ':hover': {
-      borderRadius: '4px',
-      borderColor: 'rgba(24, 144, 255, 0.4)',
-      backgroundColor: 'rgba(24, 144, 255, 0.1)',
-    },
-  }),
-  option: (styles, { data, isDisabled, isSelected }) => {
-    return {
-      ...styles,
-      cursor: isDisabled ? 'not-allowed' : 'pointer',
-
-      ':active': {
-        ...styles[':active'],
-        backgroundColor: !isDisabled && (isSelected ? data.color : 'white'),
-      },
-    }
-  },
-}
 
 const DataAnalysis = () => {
   const classes = useStyles()
@@ -75,6 +58,10 @@ const DataAnalysis = () => {
     sliadingAverage: false,
   })
 
+  const [selectedFiles, setSelectedFiles] = useState([])
+  const [correctFiles, setCorrectFiles] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+
   useEffect(() => {
     axios
       .get('http://localhost:8082/api/upload/correct-data')
@@ -86,20 +73,147 @@ const DataAnalysis = () => {
         console.log(error)
       })
       .then(() => {
-        // always executed
+        setIsLoading(false)
       })
   }, [])
 
   useEffect(() => {
-    setOptions()
+    transformDataIntoRightFormat()
   }, [datas])
 
+  useEffect(() => {
+    setOptions()
+  }, [correctFiles])
+
   const setOptions = () => {
-    datas.map((data) => setOptionsForSelect((prevState) => [...prevState, { value: data, label: data.name }]))
+    correctFiles.map((file) =>
+      setOptionsForSelect((prevState) => [...prevState, { value: file.data, label: file.name }])
+    )
   }
 
-  const handleOnButtonClick = (attribute) => {
+  const transformDataIntoRightFormat = () => {
+    for (let i = 0; i < datas.length; i++) {
+      const file = datas[i].data
+
+      let dataObject = {}
+      for (let i = 0; i < Object.values(file).length; i++) {
+        let row = file[i] // Uloženie jedného riadku do premennej row, riadok má tvar objektu
+        for (let key in row) {
+          if (!dataObject[key]) {
+            dataObject[key] = []
+          }
+          dataObject[key].push(parseFloat(row[key]))
+        }
+      }
+      setCorrectFiles((prevState) => [...prevState, { data: dataObject, name: datas[i].name }])
+    }
+  }
+
+  const clickOnCoCo2Button = (attribute) => {
     setChart((prevState) => ({ ...prevState, [attribute]: true }))
+
+    const chartModel = []
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+      let COPlusCO2 = []
+      console.log(selectedFiles[i].value)
+      let datas = selectedFiles[i].value
+
+      for (let j = 0; j < Object.keys(datas['k4_co']).length; j++) {
+        let valueCO = datas['k4_co'][j]
+        let valueCO2 = datas['k4_co2'][j]
+
+        if (valueCO < 0) {
+          valueCO = 0
+        }
+        if (valueCO2 < 0) {
+          valueCO2 = 0
+        }
+        if (valueCO > 100) {
+          valueCO = 100
+        }
+        if (valueCO2 > 100) {
+          valueCO2 = 100
+        }
+
+        let resultValue = Number(valueCO) + Number(valueCO2)
+
+        if (resultValue > 100) {
+          resultValue = 100
+        }
+
+        COPlusCO2.push(resultValue)
+      }
+
+      chartModel.push({
+        data: COPlusCO2,
+        label: `${selectedFiles[i].label}_CO + CO2`,
+        backgroundColor: getRandomColor(),
+      })
+    }
+    let myChartCOCO2 = document.getElementById('myChartCOCO2')
+
+    let yAxesText = 'Koncentrácia (%)'
+    let xAxesText = 'Čas (s)'
+
+    const chart = createNewChart(myChartCOCO2, '', yAxesText, xAxesText, false)
+    renderChart(chartModel, chart, false)
+  }
+
+  const onGradientClick = (attribute) => {
+    setChart((prevState) => ({ ...prevState, [attribute]: true }))
+
+    const chartModel = []
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+      let datas = selectedFiles[i].value
+      let gradient = []
+
+      for (let j = 0; j < Object.keys(datas['k4_co']).length; j++) {
+        let valueCOcurrent = datas['k4_co'][j]
+        let valueCO2current = datas['k4_co2'][j]
+
+        let valueCOprevious = datas['k4_co'][j - 1]
+        let valueCO2previous = datas['k4_co2'][j - 1]
+
+        let sumCOCO2current = Number(valueCOcurrent) + Number(valueCO2current)
+        let sumCO2previous = Number(valueCOprevious) + Number(valueCO2previous)
+
+        if (valueCOcurrent < 0) {
+          valueCOcurrent = 0
+        }
+        if (valueCO2current < 0) {
+          valueCO2current = 0
+        }
+        if (valueCOcurrent > 100) {
+          valueCOcurrent = 100
+        }
+        if (valueCO2current > 100) {
+          valueCO2current = 100
+        }
+        if (sumCOCO2current > 100) {
+          sumCOCO2current = 100
+        }
+
+        let resultValue = Number(sumCOCO2current) - Number(sumCO2previous)
+        gradient.push(resultValue)
+      }
+
+      // Pridávanie hodnôt do modelu
+      chartModel.push({
+        data: gradient,
+        label: correctFiles[i].name,
+        backgroundColor: getRandomColor(),
+      })
+    }
+
+    let myChartGradient = document.getElementById('myChartGradient')
+
+    let yAxesText = 'Koncentrácia (%)'
+    let xAxesText = 'Čas (s)'
+
+    const chart = createNewChart(myChartGradient, '', yAxesText, xAxesText, false)
+    renderChart(chartModel, chart, false)
   }
 
   return (
@@ -108,54 +222,42 @@ const DataAnalysis = () => {
         <Typography gutterBottom>Select files from database</Typography>
         <Divider />
       </Grid>
+
       <Grid item xs={10} sm={5} md={4} lg={2}>
-        <Select
-          isClearable
-          isSearchable
-          styles={selectStyles}
+        <MultiSelect
+          className={classes.select}
+          isLoading={isLoading}
           options={optionsForSelect}
-          onChange={(value) => {}}
-        ></Select>
+          value={selectedFiles}
+          onChange={(value) => setSelectedFiles(value)}
+        ></MultiSelect>
       </Grid>
 
       <Grid item xs={12} sm={12} md={8} lg={10}>
-        <Button className={classes.buttonSuccess} variant="contained" onClick={() => handleOnButtonClick('coco2')}>
+        <Button className={classes.buttonSuccess} variant="contained" onClick={() => clickOnCoCo2Button('coco2')}>
           Co + Co 2
         </Button>
-        <Button className={classes.buttonError} variant="contained" onClick={() => handleOnButtonClick('gradient')}>
+        <Button className={classes.buttonError} variant="contained" onClick={() => onGradientClick('gradient')}>
           Gradient
         </Button>
-        <Button
-          className={classes.buttonStatus}
-          variant="contained"
-          onClick={() => handleOnButtonClick('sliadingAverage')}
-        >
+        <Button className={classes.buttonStatus} variant="contained" onClick={() => {}}>
           Kĺzavý priemer
         </Button>
       </Grid>
 
       <Box className={classes.chartBox}>
         <Grid item xs={12} className={classes.chart}>
-          <canvas
-            id="myChartCOCO2"
-            style={chart.coco2 === false ? { visibility: 'hidden' } : { visibility: 'visible' }}
-          ></canvas>
+          <canvas id="myChartCOCO2"></canvas>
         </Grid>
       </Box>
       <Box className={classes.chartBox}>
         <Grid item xs={12} className={classes.chart}>
-          <canvas
-            id="myChartGradientCanvas"
-            style={chart.gradient === false ? { visibility: 'hidden' } : { visibility: 'visible' }}
-          ></canvas>
+          <canvas id="myChartGradient"></canvas>
         </Grid>
       </Box>
       <Box className={classes.chartBox}>
         <Grid item xs={12} className={classes.chart}>
-          <canvas
-            id="myChartPriemer"
-            style={chart.sliadingAverage === false ? { visibility: 'hidden' } : { visibility: 'visible' }}
-          ></canvas>
+          <canvas id="myChartPriemer"></canvas>
         </Grid>
       </Box>
     </Grid>

@@ -1,7 +1,7 @@
 export const buttonSuccess = {
-  margin: '0 10px 10px 0',
+  margin: '0 10px 0 0',
   textTransform: 'none',
-  lineHeight: 1.5,
+  /* lineHeight: 1.5, */
   backgroundColor: 'rgba(16, 185, 129, 0.1)',
   border: '1px solid rgba(16, 185, 129, 0.4)',
   borderRadius: '2px',
@@ -14,9 +14,9 @@ export const buttonSuccess = {
 }
 
 export const buttonError = {
-  margin: '0 10px 10px 0',
+  margin: '0 10px 0 0',
   textTransform: 'none',
-  lineHeight: 1.5,
+  /* lineHeight: 1.5, */
   backgroundColor: 'rgba(239, 68, 68, 0.1)',
   border: '1px solid rgba(239, 68, 68, 0.4)',
   color: 'rgba(239, 68, 68, 1)',
@@ -29,9 +29,9 @@ export const buttonError = {
 }
 
 export const buttonStatus = {
-  margin: '0 10px 10px 0',
+  margin: '0 10px 0 0',
   textTransform: 'none',
-  lineHeight: 1.5,
+ /*  lineHeight: 1.5, */
   backgroundColor: 'rgba(63, 81, 181, 0.1)',
   border: '1px solid rgba(63, 81, 181, 0.4)',
   borderRadius: '2px',

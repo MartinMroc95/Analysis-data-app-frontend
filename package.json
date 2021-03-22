@@ -20,6 +20,7 @@
     "chart.js": "^2.9.4",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-multi-select-component": "^3.1.6",
     "react-reveal": "^1.2.2",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",

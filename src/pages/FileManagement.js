@@ -22,23 +22,25 @@ const useStyles = makeStyles(() => ({
   root: {
     display: 'flex',
     width: '100%',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
   },
   select: {
-    display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
-    border: '1px solid blue',
-    '&:hover': {
-      cursor: 'pointer',
-    },
   },
   buttonError: buttonError,
   buttonStatus: buttonStatus,
   buttonSuccess: buttonSuccess,
-  chartBox: { display: 'flex', width: '100%', justifyContent: 'center' },
+  chartBox: {
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center',
+  },
   chart: {
-    maxWidth: '1280px',
+    justifyContent: 'center',
+    width: '100%',
   },
 }))
 
@@ -47,11 +49,12 @@ const selectStyles = {
     ...styles,
     backgroundColor: 'white',
     cursor: 'pointer',
-    ':hover': {
+    /*  ':hover': {
       borderRadius: '4px',
       borderColor: 'rgba(24, 144, 255, 0.4)',
       backgroundColor: 'rgba(24, 144, 255, 0.1)',
-    },
+    }, */
+    maxWidth: '300px',
   }),
   option: (styles, { data, isDisabled, isSelected }) => {
     return {
@@ -75,6 +78,8 @@ const FileManagement = () => {
   const [showDialog, setShowDialog] = useState(false)
   const [optionsForSelect, setOptionsForSelect] = useState([])
 
+  const [isLoading, setIsLoading] = useState(true)
+
   useEffect(() => {
     setFileStatus(selectedFile.status)
     initCOCO2Chart(selectedFile)
@@ -91,7 +96,7 @@ const FileManagement = () => {
         console.log(error)
       })
       .then(() => {
-        // always executed
+        setIsLoading(false)
       })
   }, [])
 
@@ -123,8 +128,10 @@ const FileManagement = () => {
         <Divider />
       </Grid>
 
-      <Grid item xs={10} sm={5} md={4} lg={2}>
+      <Grid item xs={10} sm={12} md={4} lg={2} className={classes.select}>
         <Select
+          isLoading={isLoading}
+          disabled={isLoading}
           isClearable
           isSearchable
           styles={selectStyles}
@@ -133,7 +140,7 @@ const FileManagement = () => {
         ></Select>
       </Grid>
 
-      <Grid item xs={12} sm={12} md={8} lg={10}>
+      <Grid item xs={12} sm={12} md={8} lg={10} style={{ display: 'flex', alignItems: 'center' }}>
         <Button className={classes.buttonSuccess} variant="contained" onClick={() => handleOnStatusClick('Vyhovujúci')}>
           Correct
         </Button>
@@ -145,28 +152,27 @@ const FileManagement = () => {
         </Button>
       </Grid>
 
-      <Box className={classes.chartBox}>
-        <Grid item xs={12} className={classes.chart}>
+      <Grid item xs={12} xl={10} className={classes.chartBox}>
+        <Box className={classes.chart}>
           <canvas
             id="myChartCOCO2"
             style={selectedFile === '' ? { visibility: 'hidden' } : { visibility: 'visible' }}
           ></canvas>
-
-          <Dialog open={showDialog} onClose={() => setShowDialog(false)} aria-labelledby="customized-dialog-title">
-            <DialogTitle id="alert-dialog-title">{'Status changed'}</DialogTitle>
-            <DialogContent dividers>
-              <DialogContentText style={{ margin: 0 }} id="alert-dialog-description">
-                File status was successfully changed!
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setShowDialog(false)} color="primary">
-                Close
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </Grid>
-      </Box>
+        </Box>
+        <Dialog open={showDialog} onClose={() => setShowDialog(false)} aria-labelledby="customized-dialog-title">
+          <DialogTitle id="alert-dialog-title">{'Status changed'}</DialogTitle>
+          <DialogContent dividers>
+            <DialogContentText style={{ margin: 0 }} id="alert-dialog-description">
+              File status was successfully changed!
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowDialog(false)} color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Grid>
     </Grid>
   )
 }
