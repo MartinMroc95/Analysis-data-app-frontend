@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import Select from 'react-select'
-import Fade from 'react-reveal/Fade'
 import { initCOCO2Chart } from '../components/Charts/COCO2Chart'
-import { buttonError, buttonStatus, buttonSuccess } from '../components/Button'
+import { buttonError, buttonStatus, buttonSuccess, buttonDelete } from '../components/Button'
 import {
   Button,
   Typography,
@@ -24,16 +23,13 @@ const useStyles = makeStyles(() => ({
     width: '100%',
     justifyContent: 'center',
   },
-  select: {
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start',
-  },
   buttonError: buttonError,
   buttonStatus: buttonStatus,
   buttonSuccess: buttonSuccess,
+  buttonDelete: buttonDelete,
   chartBox: {
     display: 'flex',
-    width: '100%',
+    width: '1460px',
     justifyContent: 'center',
     alignContent: 'center',
     alignItems: 'center',
@@ -49,18 +45,19 @@ const selectStyles = {
     ...styles,
     backgroundColor: 'white',
     cursor: 'pointer',
-    /*  ':hover': {
-      borderRadius: '4px',
-      borderColor: 'rgba(24, 144, 255, 0.4)',
-      backgroundColor: 'rgba(24, 144, 255, 0.1)',
-    }, */
     maxWidth: '300px',
   }),
+  menu: (styles) => {
+    return {
+      ...styles,
+      maxWidth: '300px',
+    }
+  },
   option: (styles, { data, isDisabled, isSelected }) => {
     return {
       ...styles,
       cursor: isDisabled ? 'not-allowed' : 'pointer',
-
+      maxWidth: '300px',
       ':active': {
         ...styles[':active'],
         backgroundColor: !isDisabled && (isSelected ? data.color : 'white'),
@@ -76,6 +73,7 @@ const FileManagement = () => {
   const [selectedFile, setSelectedFile] = useState('')
   const [fileStatus, setFileStatus] = useState('')
   const [showDialog, setShowDialog] = useState(false)
+  const [showDialogForDelete, setShowDialogForDelete] = useState(false)
   const [optionsForSelect, setOptionsForSelect] = useState([])
 
   const [isLoading, setIsLoading] = useState(true)
@@ -95,7 +93,7 @@ const FileManagement = () => {
         // handle error
         console.log(error)
       })
-      .then(() => {
+      .finally(() => {
         setIsLoading(false)
       })
   }, [])
@@ -108,17 +106,42 @@ const FileManagement = () => {
     datas.map((data) => setOptionsForSelect((prevState) => [...prevState, { value: data, label: data.name }]))
   }
 
-  const handleOnStatusClick = (selectedStatus) => {
-    axios
-      .post(`http://localhost:8082/api/upload/set-status/${selectedFile._id}`, { status: selectedStatus })
-      .then((response) => {
+  const onStatusClick = (selectedStatus) => {
+    const getCleanCodeArticle = async () => {
+      await axios
+        .post(`http://localhost:8082/api/upload/set-status/${selectedFile._id}`, { status: selectedStatus })
+        .then((response) => {
+          console.log(response)
+          setFileStatus(response.data.data.status)
+          setShowDialog(true)
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    }
+    getCleanCodeArticle()
+  }
+
+  /* .then((response) => {
         // then print response status
         setFileStatus(response.data.data.status)
         setShowDialog(true)
       })
       .catch((error) => {
         console.log(error)
+      }) */
+
+  const onDeleteClick = () => {
+    axios
+      .post(`http://localhost:8082/api/upload/data/${selectedFile._id}`)
+      .then((response) => {
+        console.log(response.status)
+        setShowDialogForDelete(true)
       })
+      .catch((error) => {
+        console.log(error)
+      })
+      .finally(() => {})
   }
 
   return (
@@ -128,7 +151,7 @@ const FileManagement = () => {
         <Divider />
       </Grid>
 
-      <Grid item xs={10} sm={12} md={4} lg={2} className={classes.select}>
+      <Grid item xs={12} sm={12} md={2} className={classes.select}>
         <Select
           isLoading={isLoading}
           disabled={isLoading}
@@ -140,34 +163,62 @@ const FileManagement = () => {
         ></Select>
       </Grid>
 
-      <Grid item xs={12} sm={12} md={8} lg={10} style={{ display: 'flex', alignItems: 'center' }}>
-        <Button className={classes.buttonSuccess} variant="contained" onClick={() => handleOnStatusClick('Vyhovujúci')}>
+      <Grid item xs={12} sm={12} md={10} style={{ display: 'flex', alignItems: 'center' }}>
+        <Button className={classes.buttonSuccess} variant="outlined" onClick={() => onStatusClick('Vyhovujúci')}>
           Correct
         </Button>
-        <Button className={classes.buttonError} variant="contained" onClick={() => handleOnStatusClick('Nevyhovujúci')}>
-          InCorrect
+        <Button className={classes.buttonError} variant="outlined" onClick={() => onStatusClick('Nevyhovujúci')}>
+          Incorrect
         </Button>
-        <Button className={classes.buttonStatus} variant="contained">
-          File status: {fileStatus || ''}
+        <Button className={classes.buttonDelete} variant="outlined" onClick={onDeleteClick}>
+          Delete
+        </Button>
+        <Button className={classes.buttonStatus} variant="outlined">
+          File status:
+          <span
+            style={
+              fileStatus === 'Vyhovujúci'
+                ? { color: 'rgba(16, 185, 129, 1)', paddingLeft: '5px', fontWeight: 'bold' }
+                : { color: 'rgba(239, 68, 68, 1)', paddingLeft: '5px', fontWeight: 'bold' }
+            }
+          >
+            {fileStatus || ''}
+          </span>
         </Button>
       </Grid>
 
-      <Grid item xs={12} xl={10} className={classes.chartBox}>
+      <Grid item className={classes.chartBox} style={selectedFile === '' ? { display: 'none' } : { display: 'flex' }}>
         <Box className={classes.chart}>
-          <canvas
-            id="myChartCOCO2"
-            style={selectedFile === '' ? { visibility: 'hidden' } : { visibility: 'visible' }}
-          ></canvas>
+          <canvas id="myChartCOCO2"></canvas>
         </Box>
+
         <Dialog open={showDialog} onClose={() => setShowDialog(false)} aria-labelledby="customized-dialog-title">
           <DialogTitle id="alert-dialog-title">{'Status changed'}</DialogTitle>
           <DialogContent dividers>
             <DialogContentText style={{ margin: 0 }} id="alert-dialog-description">
-              File status was successfully changed!
+              File status has been changed successfully!
             </DialogContentText>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setShowDialog(false)} color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog
+          open={showDialogForDelete}
+          onClose={() => setShowDialogForDelete(false)}
+          aria-labelledby="customized-dialog-title"
+        >
+          <DialogTitle id="alert-dialog-title">{'Status changed'}</DialogTitle>
+          <DialogContent dividers>
+            <DialogContentText style={{ margin: 0 }} id="alert-dialog-description">
+              File has been deleted successfully!
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowDialogForDelete(false)} color="primary">
               Close
             </Button>
           </DialogActions>
