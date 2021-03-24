@@ -1,116 +1,105 @@
-export const buttonSuccess = {
-  width: '100px',
-  heigth: '38px',
-  margin: '0 10px 0 0',
-  textTransform: 'none',
-  lineHeight: 1.5,
-  backgroundColor: 'rgba(16, 185, 129, 0.1)',
-  border: '1px solid rgba(16, 185, 129, 0.4)',
-  borderRadius: '2px',
-  color: 'rgba(16, 185, 129, 1)',
-  '&:hover': {
-    backgroundColor: 'rgba(16, 185, 129, 1)',
-    border: '1px solid rgba(16, 185, 129, 1)',
-    color: 'white',
-  },
-}
-
-export const buttonError = {
-  width: '100px',
-  heigth: '38px',
-  margin: '0 10px 0 0',
-  textTransform: 'none',
-  lineHeight: 1.5,
-  backgroundColor: 'rgba(239, 68, 68, 0.1)',
-  border: '1px solid rgba(239, 68, 68, 0.4)',
-  color: 'rgba(239, 68, 68, 1)',
-  borderRadius: '2px',
-  '&:hover': {
-    backgroundColor: 'rgba(239, 68, 68, 1)',
-    border: '1px solid rgba(239, 68, 68, 1)',
-    color: 'white',
-  },
-}
-
-export const buttonStatus = {
-  heigth: '38px',
-  margin: '0 10px 0 0',
-  textTransform: 'none',
-  lineHeight: 1.5,
-  /* backgroundColor: 'rgba(63, 81, 181, 0.1)', */
-  /* border: '1px solid rgba(63, 81, 181, 0.4)', */
-   borderRadius: '2px',
-  color: 'black',
-  /* '&:hover': {
-    backgroundColor: 'rgba(63, 81, 181, 0.3)',
-    border: '1px solid rgba(63, 81, 181, 1)',
-    color: 'rgba(63, 81, 181, 1),',
-  }, */
-}
-
-export const buttonDelete = {
-  width: '100px',
-  heigth: '38px',
-  margin: '0 10px 0 0',
-  textTransform: 'none',
-  lineHeight: 1.5,
-  backgroundColor: 'rgba(63, 81, 181, 0.1)',
-  border: '1px solid rgba(63, 81, 181, 0.4)',
-  borderRadius: '2px',
-  color: 'rgba(63, 81, 181, 1)',
-  '&:hover': {
-    backgroundColor: 'rgba(63, 81, 181, 1)',
-    border: '1px solid rgba(63, 81, 181, 1)',
-    color: 'white',
-  },
-}
-
-/* import React from 'react'
-import { createMuiTheme, withStyles, makeStyles, ThemeProvider } from '@material-ui/core/styles'
+import React, { useEffect, useState } from 'react'
+import { makeStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
 
-const BootstrapButton = withStyles({
-  root: {
-    boxShadow: 'none',
-    textTransform: 'none',
-    fontSize: 16,
-    padding: '6px 12px',
-    border: '1px solid',
-    lineHeight: 1.5,
-    backgroundColor: '#0063cc',
-    borderColor: '#0063cc',
-    fontFamily: [
-      '-apple-system',
-      'BlinkMacSystemFont',
-      '"Segoe UI"',
-      'Roboto',
-      '"Helvetica Neue"',
-      'Arial',
-      'sans-serif',
-      '"Apple Color Emoji"',
-      '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"',
-    ].join(','),
-    '&:hover': {
-      backgroundColor: '#0069d9',
-      borderColor: '#0062cc',
-      boxShadow: 'none',
-    },
-    '&:active': {
-      boxShadow: 'none',
-      backgroundColor: '#0062cc',
-      borderColor: '#005cbf',
-    },
-    '&:focus': {
-      boxShadow: '0 0 0 0.2rem rgba(0,123,255,.5)',
-    },
-  },
-})(Button)
+const primary = {
+  backgroundColor: 'rgba(63, 81, 181, 0.1)',
+  borderColor: 'rgba(63, 81, 181, 0.4)',
+  backgroundColorHover: 'rgba(63, 81, 181, 1)',
+  borderColorHover: 'rgba(63, 81, 181, 1)',
+}
 
-export default function CustomizedButtons({ children, props }) {
+const secondary = {
+  backgroundColor: 'rgba(0, 188, 212, 0.1)',
+  borderColor: 'rgba(0, 188, 212, 0.4)',
+  backgroundColorHover: 'rgba(0, 188, 212, 1)',
+  borderColorHover: 'rgba(0, 188, 212, 1)',
+}
+const success = {
+  backgroundColor: 'rgba(16, 185, 129, 0.1)',
+  borderColor: 'rgba(16, 185, 129, 0.4)',
+  backgroundColorHover: 'rgba(16, 185, 129, 1)',
+  borderColorHover: 'rgba(16, 185, 129, 1)',
+}
+
+const remove = {
+  backgroundColor: 'rgba(233, 30, 99, 0.1)',
+  borderColor: 'rgba(233, 30, 99, 0.4)',
+  backgroundColorHover: 'rgba(233, 30, 99, 1)',
+  borderColorHover: 'rgba(233, 30, 99, 1)',
+}
+
+const error = {
+  backgroundColor: 'rgba(239, 68, 68, 0.1)',
+  borderColor: 'rgba(239, 68, 68, 0.4)',
+  backgroundColorHover: 'rgba(239, 68, 68, 1)',
+  borderColorHover: 'rgba(239, 68, 68, 1)',
+}
+
+function CustomizedButton({ children, ...props }) {
+  const [color, setColor] = useState('')
+
+  const switchClassName = (key) => {
+    switch (key) {
+      case 'primary':
+        return setColor(primary)
+      case 'secondary':
+        return setColor(secondary)
+      case 'success':
+        return setColor(success)
+      case 'remove':
+        return setColor(remove)
+      case 'error':
+        return setColor(error)
+      default:
+        break
+    }
+  }
+
+  useEffect(() => {
+    switchClassName(props.buttoncolor)
+  }, [props.buttoncolor])
+
+  const useStyles = makeStyles(() => ({
+    root: {
+      width: '140px',
+      boxShadow: 'none',
+      textTransform: 'none',
+      lineHeight: 1.5,
+      marginRight: '10px',
+      borderRadius: '2px',
+      backgroundColor: color.backgroundColor,
+      color: '#000018',
+      border: `1px solid ${color.borderColor}`,
+      '&:hover': {
+        fontWeight: 'bold',
+        color: 'white',
+        backgroundColor: color.backgroundColorHover,
+        borderColor: color.borderColorHover,
+        boxShadow: 'none',
+      },
+      '&:active': {
+        boxShadow: 'none',
+        backgroundColor: '#0062cc',
+        borderColor: '#005cbf',
+      },
+      '&:focus': {
+        boxShadow: `0 0 0 0.2rem ${color.borderColor}`,
+      },
+      '&:disabled': {
+        borderColor: 'rgba(192, 192, 192, 1)',
+        backgroundColor: 'rgba(192, 192, 192, 0.6)',
+      },
+    },
+  }))
+
+  const classes = useStyles()
+
   return (
-    <BootstrapButton {...props} color="primary">
+    <Button className={classes.root} {...props} onClick={props.onClick}>
       {children}
-    </BootstrapButton>
+    </Button>
   )
-} */
+}
+
+export default CustomizedButton

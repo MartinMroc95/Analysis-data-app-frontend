@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import { buttonError, buttonStatus, buttonSuccess } from '../components/Button'
+import CustomizedButton from '../components/Button'
 import {
   Button,
   Typography,
@@ -21,11 +21,11 @@ import {
   TableCell,
   TableBody,
   Paper,
-  Drawer,
+  TextField,
 } from '@material-ui/core'
 import MultiSelect from 'react-multi-select-component'
 
-import { getRandomColor } from '../utils/randomColor'
+import { getRandomColor } from '../utils/colors'
 import { findMax } from '../utils/chartFunctions'
 import { findMin } from '../utils/chartFunctions'
 import { renderChart } from '../components/Charts/RenderFunctions'
@@ -42,9 +42,7 @@ const useStyles = makeStyles(() => ({
       cursor: 'pointer',
     },
   },
-/*   buttonError: buttonError,
-  buttonStatus: buttonStatus,
-  buttonSuccess: buttonSuccess, */
+  buttonStatus: { borderRadius: '2px', textTransform: 'none' },
   chartGrid: {
     display: 'flex',
     flexDirection: 'column',
@@ -111,10 +109,13 @@ const DataAnalysis = () => {
   const [correctFiles, setCorrectFiles] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
+  const [showDialogForSlidingAverage, setShowDialogForSlidingAverage] = useState(false)
+
   const [rozptyl, setRozptyl] = useState('')
   const [maximum, setMaximum] = useState('')
   const [minimum, setMinimum] = useState('')
   const [average, setAverage] = useState('')
+  const [step, setStep] = useState('')
 
   useEffect(() => {
     axios
@@ -270,15 +271,14 @@ const DataAnalysis = () => {
     renderChart(chartModel, chart, false)
   }
 
-  // Sli
-  const onSlidingAverageClick = (attribute) => {
+  // Sliding average chart
+  const renderSlidingAverageChart = (attribute) => {
     setChart((prevState) => ({ ...prevState, [attribute]: true }))
 
     const chartModel = []
     const lastValues = []
 
     let pomArray = []
-    const krok = 50
 
     // Prechádzanie všetkých vybratých súborov
     for (let i = 0; i < selectedFiles.length; i++) {
@@ -320,14 +320,14 @@ const DataAnalysis = () => {
 
         pomocnyArray.push(resultValue)
 
-        if (pomocnyArray.length < krok) {
+        if (pomocnyArray.length < step) {
           let sum = pomocnyArray.reduce((a, b) => a + b, 0)
           let ciastkovyKlzavyPriemer = sum / pomocnyArray.length
           klzavyPriemer.push(ciastkovyKlzavyPriemer)
         } else {
-          let novyArray = pomocnyArray.slice(j - krok, j)
+          let novyArray = pomocnyArray.slice(j - step, j)
           let sum = novyArray.reduce((a, b) => a + b, 0)
-          let ciastkovyKlzavyPriemer = sum / krok
+          let ciastkovyKlzavyPriemer = sum / step
           klzavyPriemer.push(ciastkovyKlzavyPriemer)
 
           novyArray = []
@@ -371,6 +371,11 @@ const DataAnalysis = () => {
     renderChart(chartModel, chart, false)
   }
 
+  const onStepButtonClick = () => {
+    setShowDialogForSlidingAverage(false)
+    renderSlidingAverageChart('slidingAverage')
+  }
+
   return (
     <Grid container className={classes.root} spacing={2}>
       <Grid item xs={12}>
@@ -388,20 +393,21 @@ const DataAnalysis = () => {
         ></MultiSelect>
       </Grid>
 
-      <Grid item xs={12} sm={12} md={8} lg={10}>
-        <Button className={classes.buttonSuccess} variant="contained" onClick={() => onCoCo2Click('coco2')}>
-          Co + Co 2
-        </Button>
-        <Button className={classes.buttonError} variant="contained" onClick={() => onGradientClick('gradient')}>
+      <Grid item xs={12} sm={12} md={8} lg={10} style={{ display: 'flex', alignItems: 'center' }}>
+        <CustomizedButton buttoncolor="primary" onClick={() => onCoCo2Click('coco2')}>
+          CO+CO2
+        </CustomizedButton>
+        <CustomizedButton buttoncolor="secondary" onClick={() => onGradientClick('gradient')}>
           Gradient
-        </Button>
-        <Button
-          className={classes.buttonStatus}
-          variant="contained"
-          onClick={() => onSlidingAverageClick('slidingAverage')}
-        >
+        </CustomizedButton>
+        <CustomizedButton buttoncolor="secondary" onClick={() => setShowDialogForSlidingAverage(true)}>
           Kĺzavý priemer
-        </Button>
+        </CustomizedButton>
+        {chart.slidingAverage ? (
+          <Button className={classes.buttonStatus} variant="outlined">
+            Step: {step}
+          </Button>
+        ) : null}
       </Grid>
 
       <Grid item className={chart.coco2 ? classes.chartGrid : classes.chartGridNone}>
@@ -468,6 +474,29 @@ const DataAnalysis = () => {
       ) : (
         ''
       )}
+
+      <Dialog
+        open={showDialogForSlidingAverage}
+        onClose={() => setShowDialogForSlidingAverage(false)}
+        aria-labelledby="form-dialog-title"
+      >
+        <DialogTitle id="form-dialog-title">Step for Sliding average</DialogTitle>
+        <DialogContent dividers>
+          <DialogContentText>Please, set step for calculating of sliding average.</DialogContentText>
+          <TextField
+            required
+            autoFocus
+            id="standard-required"
+            label="Sliding Average"
+            onChange={(event) => setStep(event.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => onStepButtonClick()} color="primary">
+            Ok
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   )
 }

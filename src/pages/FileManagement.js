@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import Select from 'react-select'
 import { initCOCO2Chart } from '../components/Charts/COCO2Chart'
-import { buttonError, buttonStatus, buttonSuccess, buttonDelete } from '../components/Button'
 import {
   Button,
   Typography,
@@ -16,6 +15,7 @@ import {
   Divider,
   Box,
 } from '@material-ui/core'
+import CustomizedButton from '../components/Button'
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -23,20 +23,17 @@ const useStyles = makeStyles(() => ({
     width: '100%',
     justifyContent: 'center',
   },
-  buttonError: buttonError,
-  buttonStatus: buttonStatus,
-  buttonSuccess: buttonSuccess,
-  buttonDelete: buttonDelete,
+  buttonStatus: { borderRadius: '2px', textTransform: 'none' },
   chartBox: {
     display: 'flex',
-    width: '1460px',
-    justifyContent: 'center',
-    alignContent: 'center',
-    alignItems: 'center',
+    maxWidth: '1460px',
+    width: '100%',
+    height: '79vh',
   },
   chart: {
-    justifyContent: 'center',
+    display: 'flex',
     width: '100%',
+    alignItems: 'center',
   },
 }))
 
@@ -72,8 +69,10 @@ const FileManagement = () => {
   const [datas, setDatas] = useState([])
   const [selectedFile, setSelectedFile] = useState('')
   const [fileStatus, setFileStatus] = useState('')
+
   const [showDialog, setShowDialog] = useState(false)
   const [showDialogForDelete, setShowDialogForDelete] = useState(false)
+
   const [optionsForSelect, setOptionsForSelect] = useState([])
 
   const [isLoading, setIsLoading] = useState(true)
@@ -122,15 +121,6 @@ const FileManagement = () => {
     getCleanCodeArticle()
   }
 
-  /* .then((response) => {
-        // then print response status
-        setFileStatus(response.data.data.status)
-        setShowDialog(true)
-      })
-      .catch((error) => {
-        console.log(error)
-      }) */
-
   const onDeleteClick = () => {
     axios
       .post(`http://localhost:8082/api/upload/data/${selectedFile._id}`)
@@ -164,15 +154,15 @@ const FileManagement = () => {
       </Grid>
 
       <Grid item xs={12} sm={12} md={10} style={{ display: 'flex', alignItems: 'center' }}>
-        <Button className={classes.buttonSuccess} variant="outlined" onClick={() => onStatusClick('Vyhovujúci')}>
+        <CustomizedButton buttoncolor="success" onClick={() => onStatusClick('Vyhovujúci')}>
           Correct
-        </Button>
-        <Button className={classes.buttonError} variant="outlined" onClick={() => onStatusClick('Nevyhovujúci')}>
+        </CustomizedButton>
+        <CustomizedButton buttoncolor="error" onClick={() => onStatusClick('Nevyhovujúci')}>
           Incorrect
-        </Button>
-        <Button className={classes.buttonDelete} variant="outlined" onClick={onDeleteClick}>
+        </CustomizedButton>
+        <CustomizedButton buttoncolor="remove" onClick={() => onDeleteClick()}>
           Delete
-        </Button>
+        </CustomizedButton>
         <Button className={classes.buttonStatus} variant="outlined">
           File status:
           <span

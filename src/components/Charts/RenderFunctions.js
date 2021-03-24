@@ -1,4 +1,4 @@
-import { getRandomColor } from '../../utils/randomColor'
+import { getRandomColor } from '../../utils/colors'
 import { chartOptions } from './DefaultSettings'
 
 export const renderCOCO2Chart = (data) => {
