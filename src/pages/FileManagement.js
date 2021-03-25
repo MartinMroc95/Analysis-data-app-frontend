@@ -2,19 +2,8 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import Select from 'react-select'
 import { initCOCO2Chart } from '../components/Charts/COCO2Chart'
-import {
-  Button,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  makeStyles,
-  Grid,
-  Divider,
-  Box,
-} from '@material-ui/core'
+import { Button, Typography, Dialog, DialogTitle, DialogContent } from '@material-ui/core'
+import { DialogContentText, DialogActions, makeStyles, Grid, Divider, Box } from '@material-ui/core'
 import CustomizedButton from '../components/Button'
 
 const useStyles = makeStyles(() => ({
