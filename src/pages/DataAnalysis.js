@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
 import CustomizedButton from '../components/Button'
 import {
   Button,
@@ -26,10 +25,10 @@ import {
 import MultiSelect from 'react-multi-select-component'
 
 import { getRandomColor } from '../utils/colors'
-import { findMax } from '../utils/chartFunctions'
-import { findMin } from '../utils/chartFunctions'
+import { findMax, findMin } from '../utils/chartFunctions'
 import { renderChart } from '../components/Charts/RenderFunctions'
 import { createNewChart } from '../components/Charts/Graphs'
+import axios from 'axios'
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -102,14 +101,14 @@ const DataAnalysis = () => {
   const [chart, setChart] = useState({
     coco2: false,
     gradient: false,
-    slidingAverage: false,
+    movingAverage: false,
   })
 
   const [selectedFiles, setSelectedFiles] = useState([])
   const [correctFiles, setCorrectFiles] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
-  const [showDialogForSlidingAverage, setShowDialogForSlidingAverage] = useState(false)
+  const [showDialogForMovingAverage, setShowDialogForMovingAverage] = useState(false)
 
   const [rozptyl, setRozptyl] = useState('')
   const [maximum, setMaximum] = useState('')
@@ -272,7 +271,7 @@ const DataAnalysis = () => {
   }
 
   // Sliding average chart
-  const renderSlidingAverageChart = (attribute) => {
+  const renderMovingAverageChart = (attribute) => {
     setChart((prevState) => ({ ...prevState, [attribute]: true }))
 
     const chartModel = []
@@ -372,8 +371,8 @@ const DataAnalysis = () => {
   }
 
   const onStepButtonClick = () => {
-    setShowDialogForSlidingAverage(false)
-    renderSlidingAverageChart('slidingAverage')
+    setShowDialogForMovingAverage(false)
+    renderMovingAverageChart('movingAverage')
   }
 
   return (
@@ -400,10 +399,10 @@ const DataAnalysis = () => {
         <CustomizedButton buttoncolor="secondary" onClick={() => onGradientClick('gradient')}>
           Gradient
         </CustomizedButton>
-        <CustomizedButton buttoncolor="secondary" onClick={() => setShowDialogForSlidingAverage(true)}>
+        <CustomizedButton buttoncolor="secondary" onClick={() => setShowDialogForMovingAverage(true)}>
           Kĺzavý priemer
         </CustomizedButton>
-        {chart.slidingAverage ? (
+        {chart.movingAverage ? (
           <Button className={classes.buttonStatus} variant="outlined">
             Step: {step}
           </Button>
@@ -430,7 +429,7 @@ const DataAnalysis = () => {
         </Box>
       </Grid>
 
-      <Grid item className={chart.slidingAverage ? classes.chartGrid : classes.chartGridNone}>
+      <Grid item className={chart.movingAverage ? classes.chartGrid : classes.chartGridNone}>
         <Divider style={{ width: '100%' }} />
         <Typography variant="h5" className={classes.header}>
           Kĺzavý priemer
@@ -440,7 +439,7 @@ const DataAnalysis = () => {
         </Box>
       </Grid>
 
-      {chart.slidingAverage ? (
+      {chart.movingAverage ? (
         <Grid item xs={12}>
           <Divider style={{ width: '100%' }} />
           <Typography variant="h5" style={{ padding: '15px 0 15px 0' }}>
@@ -462,9 +461,11 @@ const DataAnalysis = () => {
                 <StyledTableRow key={maximum.fileName}>
                   <StyledTableCell align="center">{average}</StyledTableCell>
                   <StyledTableCell align="center">{rozptyl}</StyledTableCell>
-                  <StyledTableCell align="center">{maximum.value}</StyledTableCell>
+                  <StyledTableCell align="center">
+                    {maximum.value} ({maximum.fileName})
+                  </StyledTableCell>
                   <StyledTableCell align="center" style={{ borderRight: 'none' }}>
-                    {minimum.value}
+                    {minimum.value} ({minimum.fileName})
                   </StyledTableCell>
                 </StyledTableRow>
               </TableBody>
@@ -476,8 +477,8 @@ const DataAnalysis = () => {
       )}
 
       <Dialog
-        open={showDialogForSlidingAverage}
-        onClose={() => setShowDialogForSlidingAverage(false)}
+        open={showDialogForMovingAverage}
+        onClose={() => setShowDialogForMovingAverage(false)}
         aria-labelledby="form-dialog-title"
       >
         <DialogTitle id="form-dialog-title">Step for Sliding average</DialogTitle>
