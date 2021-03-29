@@ -36,6 +36,13 @@ const error = {
   borderColorHover: 'rgba(239, 68, 68, 1)',
 }
 
+const text = {
+  backgroundColor: 'rgba(192, 192, 192, 0.1)',
+  borderColor: 'rgba(192, 192, 192, 0.4)',
+  backgroundColorHover: 'rgba(192, 192, 192, 0.1)',
+  borderColorHover: 'rgba(192, 192, 192, 0.4)',
+}
+
 function CustomizedButton({ children, ...props }) {
   const [color, setColor] = useState('')
 
@@ -51,6 +58,8 @@ function CustomizedButton({ children, ...props }) {
         return setColor(remove)
       case 'error':
         return setColor(error)
+      case 'text':
+        return setColor(text)
       default:
         break
     }
@@ -63,6 +72,7 @@ function CustomizedButton({ children, ...props }) {
   const useStyles = makeStyles(() => ({
     root: {
       width: '140px',
+      minHeight: '38px',
       boxShadow: 'none',
       textTransform: 'none',
       lineHeight: 1.5,
@@ -80,8 +90,8 @@ function CustomizedButton({ children, ...props }) {
       },
       '&:active': {
         boxShadow: 'none',
-        backgroundColor: '#0062cc',
-        borderColor: '#005cbf',
+        backgroundColor: color.backgroundColorHover,
+        borderColor: color.borderColorHover,
       },
       '&:focus': {
         boxShadow: `0 0 0 0.2rem ${color.borderColor}`,

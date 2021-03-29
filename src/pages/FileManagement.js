@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
 import Select from 'react-select'
 import { initCOCO2Chart } from '../components/Charts/COCO2Chart'
 import { Button, Typography, Dialog, DialogTitle, DialogContent } from '@material-ui/core'
 import { DialogContentText, DialogActions, makeStyles, Grid, Divider, Box } from '@material-ui/core'
 import CustomizedButton from '../components/Button'
+
+import { fetchAllData } from '../api/getCalls'
+import { postUpdatedStatus, deleteSelectedFile } from '../api/postCalls'
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -12,7 +14,6 @@ const useStyles = makeStyles(() => ({
     width: '100%',
     justifyContent: 'center',
   },
-  buttonStatus: { borderRadius: '2px', textTransform: 'none' },
   chartBox: {
     display: 'flex',
     maxWidth: '1460px',
@@ -27,23 +28,40 @@ const useStyles = makeStyles(() => ({
 }))
 
 const selectStyles = {
-  control: (styles) => ({
+  control: (styles, { isFocused }) => ({
     ...styles,
+    borderRadius: '2px',
     backgroundColor: 'white',
     cursor: 'pointer',
     maxWidth: '300px',
+    border: isFocused ? '1px solid #ccc' : '1px solid #ccc',
+    lineHeight: 1.5,
+    boxShadow: isFocused ? '0 0 0 1px #ccc' : '',
+
+    '&:visited': {
+      boxShadow: '0 0 0 1px #ccc',
+    },
+    '&:hover': {
+      borderColor: 'none',
+    },
   }),
   menu: (styles) => {
     return {
       ...styles,
       maxWidth: '300px',
+      borderRadius: '2px',
     }
   },
   option: (styles, { data, isDisabled, isSelected }) => {
     return {
       ...styles,
       cursor: isDisabled ? 'not-allowed' : 'pointer',
+      backgroundColor: isSelected ? '#f1f3f5' : '',
+      color: 'black',
       maxWidth: '300px',
+      '&:hover': {
+        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+      },
       ':active': {
         ...styles[':active'],
         backgroundColor: !isDisabled && (isSelected ? data.color : 'white'),
@@ -63,8 +81,11 @@ const FileManagement = () => {
   const [showDialogForDelete, setShowDialogForDelete] = useState(false)
 
   const [optionsForSelect, setOptionsForSelect] = useState([])
-
   const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetchAllData(setDatas, setIsLoading)
+  }, [])
 
   useEffect(() => {
     setFileStatus(selectedFile.status)
@@ -72,61 +93,23 @@ const FileManagement = () => {
   }, [selectedFile])
 
   useEffect(() => {
-    axios
-      .get('http://localhost:8082/api/upload/data')
-      .then((response) => {
-        setDatas(response.data.data)
-      })
-      .catch((error) => {
-        // handle error
-        console.log(error)
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
-  }, [])
-
-  useEffect(() => {
-    setOptions()
+    datas.map((data) => setOptionsForSelect((prevState) => [...prevState, { value: data, label: data.name }]))
   }, [datas])
 
-  const setOptions = () => {
-    datas.map((data) => setOptionsForSelect((prevState) => [...prevState, { value: data, label: data.name }]))
-  }
-
   const onStatusClick = (selectedStatus) => {
-    const getCleanCodeArticle = async () => {
-      await axios
-        .post(`http://localhost:8082/api/upload/set-status/${selectedFile._id}`, { status: selectedStatus })
-        .then((response) => {
-          console.log(response)
-          setFileStatus(response.data.data.status)
-          setShowDialog(true)
-        })
-        .catch((error) => {
-          console.log(error)
-        })
-    }
-    getCleanCodeArticle()
+    postUpdatedStatus(selectedFile, selectedStatus, setFileStatus, setShowDialog)
   }
 
   const onDeleteClick = () => {
-    axios
-      .post(`http://localhost:8082/api/upload/data/${selectedFile._id}`)
-      .then((response) => {
-        console.log(response.status)
-        setShowDialogForDelete(true)
-      })
-      .catch((error) => {
-        console.log(error)
-      })
-      .finally(() => {})
+    deleteSelectedFile(selectedFile, setShowDialogForDelete)
   }
 
   return (
     <Grid container className={classes.root} spacing={2}>
       <Grid item xs={12}>
-        <Typography gutterBottom>Select files from database</Typography>
+        <Typography gutterBottom style={{ fontWeight: 'bold' }}>
+          Select file from database
+        </Typography>
         <Divider />
       </Grid>
 
@@ -152,7 +135,7 @@ const FileManagement = () => {
         <CustomizedButton buttoncolor="remove" onClick={() => onDeleteClick()}>
           Delete
         </CustomizedButton>
-        <Button className={classes.buttonStatus} variant="outlined">
+        <CustomizedButton buttoncolor="text" style={{ width: '190px', color: '#000018', fontWeight: 'bold' }}>
           File status:
           <span
             style={
@@ -163,7 +146,7 @@ const FileManagement = () => {
           >
             {fileStatus || ''}
           </span>
-        </Button>
+        </CustomizedButton>
       </Grid>
 
       <Grid item className={classes.chartBox} style={selectedFile === '' ? { display: 'none' } : { display: 'flex' }}>

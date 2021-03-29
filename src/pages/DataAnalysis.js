@@ -28,7 +28,9 @@ import { getRandomColor } from '../utils/colors'
 import { findMax, findMin } from '../utils/chartFunctions'
 import { renderChart } from '../components/Charts/RenderFunctions'
 import { createNewChart } from '../components/Charts/Graphs'
-import axios from 'axios'
+import { fetchCorrectData } from '../api/getCalls'
+
+import '../styles/DataAnalysis.css'
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -37,8 +39,15 @@ const useStyles = makeStyles(() => ({
     justifyContent: 'flex-start',
   },
   select: {
+    borderRadius: '2px ',
+    border: 'none',
     '& :hover ': {
       cursor: 'pointer',
+      /*  border: 'none', */
+    },
+    '& :active ': {
+      boxShadow: 'none',
+      /*  border: 'none', */
     },
   },
   buttonStatus: { borderRadius: '2px', textTransform: 'none' },
@@ -77,7 +86,6 @@ const useStyles = makeStyles(() => ({
 const StyledTableCell = withStyles((theme) => ({
   root: {
     borderRight: '1px solid white',
-    /* borderRadius: '2px', */
   },
   head: { backgroundColor: '#3f51b5', color: theme.palette.common.white },
   body: {
@@ -117,35 +125,10 @@ const DataAnalysis = () => {
   const [step, setStep] = useState('')
 
   useEffect(() => {
-    axios
-      .get('http://localhost:8082/api/upload/correct-data')
-      .then((response) => {
-        setDatas(response.data.data)
-      })
-      .catch((error) => {
-        // handle error
-        console.log(error)
-      })
-      .then(() => {
-        setIsLoading(false)
-      })
+    fetchCorrectData(setDatas, setIsLoading)
   }, [])
 
   useEffect(() => {
-    transformDataIntoRightFormat()
-  }, [datas])
-
-  useEffect(() => {
-    setOptions()
-  }, [correctFiles])
-
-  const setOptions = () => {
-    correctFiles.map((file) =>
-      setOptionsForSelect((prevState) => [...prevState, { value: file.data, label: file.name }])
-    )
-  }
-
-  const transformDataIntoRightFormat = () => {
     for (let i = 0; i < datas.length; i++) {
       const file = datas[i].data
 
@@ -161,7 +144,13 @@ const DataAnalysis = () => {
       }
       setCorrectFiles((prevState) => [...prevState, { data: dataObject, name: datas[i].name }])
     }
-  }
+  }, [datas])
+
+  useEffect(() => {
+    correctFiles.map((file) =>
+      setOptionsForSelect((prevState) => [...prevState, { value: file.data, label: file.name }])
+    )
+  }, [correctFiles])
 
   //  CO + CO2 Chart
   const onCoCo2Click = (attribute) => {
@@ -378,13 +367,15 @@ const DataAnalysis = () => {
   return (
     <Grid container className={classes.root} spacing={2}>
       <Grid item xs={12}>
-        <Typography gutterBottom>Select files from database</Typography>
+        <Typography gutterBottom style={{ fontWeight: 'bold' }}>
+          Select files from database
+        </Typography>
         <Divider />
       </Grid>
 
-      <Grid item xs={10} sm={5} md={4} lg={2}>
+      <Grid item xs={10} sm={5} md={4} lg={2} className={classes.select}>
         <MultiSelect
-          className={classes.select}
+          className="multi-select"
           isLoading={isLoading}
           options={optionsForSelect}
           value={selectedFiles}
@@ -445,7 +436,7 @@ const DataAnalysis = () => {
           <Typography variant="h5" style={{ padding: '15px 0 15px 0' }}>
             Štatistické výpočty
           </Typography>
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} style={{ borderRadius: '2px' }}>
             <Table className={classes.table} stickyHeader aria-label="customized table">
               <TableHead>
                 <TableRow>

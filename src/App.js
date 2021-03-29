@@ -148,7 +148,7 @@ const App = () => {
               Technological data analysis of the steelmaking
             </Typography>
             <Typography noWrap>
-              created by{' '}
+              ©2020 Created by{' '}
               <a className={classes.creator} target="_blank" rel="noreferrer" href="https://martinmroc.netlify.app/">
                 Martin Mroc
               </a>

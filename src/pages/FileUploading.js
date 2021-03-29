@@ -2,11 +2,11 @@ import React, { useState } from 'react'
 import { SheetJSFT } from '../utils/types'
 import CustomizedButton from '../components/Button'
 
-import { Box, Container, Divider, Grid, makeStyles, Snackbar, Typography } from '@material-ui/core'
+import { Box, Divider, Grid, makeStyles, Snackbar, Typography } from '@material-ui/core'
 import MuiAlert from '@material-ui/lab/Alert'
 import CloudUploadIcon from '@material-ui/icons/CloudUpload'
 import BeatLoader from 'react-spinners/BeatLoader'
-import axios from 'axios'
+import { postSelectedFiles } from '../api/postCalls'
 
 const Alert = (props) => {
   return <MuiAlert elevation={6} variant="filled" style={{ backgroundColor: 'rgba(16, 185, 129, 1)' }} {...props} />
@@ -41,37 +41,40 @@ const FileUploading = () => {
 
   const [data, setData] = useState('')
   const [loading, setLoading] = useState(false)
-  const [disabled, setDisabled] = useState(true)
+  const [disabledUpload, setDisabledUpload] = useState(true)
 
-  const [openAlert, setOpenAlert] = useState(false)
+  const [openSuccesAlert, setOpenSuccesAlert] = useState(false)
+  const [openErrorAlert, setOpenErrorAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
 
   const onCloseClick = (event, reason) => {
     if (reason === 'clickaway') {
       return
     }
-    setOpenAlert(false)
+    setOpenErrorAlert(false)
+    setOpenSuccesAlert(false)
   }
 
   const onSubmitClick = () => {
     setLoading(true)
-    axios
-      .post('http://localhost:8082/api/upload', data, {
-        // receive two parameter endpoint url ,form data
-      })
-      .then((res) => {
-        // then print response status
-        console.log(res.statusText)
-        setAlertMessage('Your files has been uploaded successfully.')
-      })
-      .finally(() => {
-        setOpenAlert(true)
-        setDisabled(true)
-        setLoading(false)
-      })
+    postSelectedFiles(data, setAlertMessage, setOpenSuccesAlert, setDisabledUpload, setLoading)
   }
 
   const onInputChange = (event) => {
+    /* console.log(Object.values(event.target.files).map((value) => console.log(value.type))) */
+
+    /*   for (let i = 0; i < event.target.files.length; i++) {
+      console.log(event.target.files[i])
+    }
+ */
+    /* Object.values(event.target.files).map((file) => console.log(file.type)) */
+
+    /*   if (event.target.files[0].type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+      setAlertMessage('The selected files are the wrong type.')
+      setOpenErrorAlert(true)
+      setDisabledUpload(true)
+      return
+    } else { */
     const files = event.target.files
     const formData = new FormData()
 
@@ -80,14 +83,17 @@ const FileUploading = () => {
 
       setAlertMessage('Your files has been selected successfully.')
       setData(formData)
-      setOpenAlert(true)
-      setDisabled(false)
+      setOpenSuccesAlert(true)
+      setDisabledUpload(false)
     }
+    /*  } */
   }
 
   return (
     <Grid className={classes.root}>
-      <Typography gutterBottom>Vyberte súbor vo formáte .xls alebo .xlsx</Typography>
+      <Typography gutterBottom style={{ fontWeight: 'bold' }}>
+        Vyberte súbor vo formáte .xls alebo .xlsx
+      </Typography>
 
       <Divider className={classes.divider} />
       <input
@@ -109,11 +115,12 @@ const FileUploading = () => {
           Choose files
         </CustomizedButton>
       </label>
+
       <CustomizedButton
         style={{ margin: '10px 0 0 0' }}
         buttoncolor="secondary"
         onClick={onSubmitClick}
-        disabled={disabled}
+        disabled={disabledUpload}
       >
         Upload files
       </CustomizedButton>
@@ -125,8 +132,14 @@ const FileUploading = () => {
         </Box>
       ) : null}
 
-      <Snackbar open={openAlert} autoHideDuration={3000} onClose={onCloseClick}>
+      <Snackbar open={openSuccesAlert} autoHideDuration={3000} onClose={onCloseClick}>
         <Alert onClose={onCloseClick} severity="success">
+          {alertMessage}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar open={openErrorAlert} autoHideDuration={3000} onClose={onCloseClick}>
+        <Alert onClose={onCloseClick} severity="error">
           {alertMessage}
         </Alert>
       </Snackbar>
