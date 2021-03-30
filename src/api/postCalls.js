@@ -27,7 +27,7 @@ export const postUpdatedStatus = async (selectedFile, selectedStatus, setFileSta
   await axios
     .put(`http://localhost:8082/api/upload/set-status/${selectedFile._id}`, { status: selectedStatus })
     .then((response) => {
-      console.log(response)
+      console.log(response.data.data.status)
       setFileStatus(response.data.data.status)
       setShowDialog(true)
     })
