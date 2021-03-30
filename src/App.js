@@ -9,11 +9,12 @@ import FolderOutlinedIcon from '@material-ui/icons/FolderOutlined'
 import DescriptionOutlinedIcon from '@material-ui/icons/DescriptionOutlined'
 
 import { Container, Drawer, AppBar, Toolbar, List, CssBaseline, Typography, Divider, Box } from '@material-ui/core'
-import { Tooltip, IconButton, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
+import { IconButton, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
 
 import FileUploading from './pages/FileUploading'
 import FileManagement from './pages/FileManagement'
 import DataAnalysis from './pages/DataAnalysis'
+import { MyTooltip } from './components/Tooltip'
 
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import clsx from 'clsx'
@@ -148,7 +149,7 @@ const App = () => {
               Technological data analysis of the steelmaking
             </Typography>
             <Typography noWrap>
-              ©2020 Created by{' '}
+              ©2021 Created by{' '}
               <a className={classes.creator} target="_blank" rel="noreferrer" href="https://martinmroc.netlify.app/">
                 Martin Mroc
               </a>
@@ -178,29 +179,29 @@ const App = () => {
         <Divider />
         <List>
           <ListItem activeClassName={classes.isActive} button exact component={NavLink} to={'/'}>
-            <Tooltip title="Loading files" placement="right" arrow>
+            <MyTooltip title="Loading files">
               <ListItemIcon className={location.pathname === '/' ? classes.isActiveIcon : null}>
                 <DescriptionOutlinedIcon />
               </ListItemIcon>
-            </Tooltip>
+            </MyTooltip>
             <ListItemText>Loading files</ListItemText>
           </ListItem>
 
           <ListItem button activeClassName={classes.isActive} component={NavLink} to={'/file-management'}>
-            <Tooltip title="File management" placement="right" arrow>
+            <MyTooltip title="File management">
               <ListItemIcon className={location.pathname === '/file-management' ? classes.isActiveIcon : null}>
                 <FolderOutlinedIcon />
               </ListItemIcon>
-            </Tooltip>
+            </MyTooltip>
             <ListItemText>File management</ListItemText>
           </ListItem>
 
           <ListItem button activeClassName={classes.isActive} component={NavLink} to={'/data-analysis'}>
-            <Tooltip title="Data analysis" placement="right" arrow>
+            <MyTooltip title="Data analysis">
               <ListItemIcon className={location.pathname === '/data-analysis' ? classes.isActiveIcon : null}>
                 <InsertChartOutlinedSharpIcon />
               </ListItemIcon>
-            </Tooltip>
+            </MyTooltip>
             <ListItemText>Data analysis</ListItemText>
           </ListItem>
         </List>

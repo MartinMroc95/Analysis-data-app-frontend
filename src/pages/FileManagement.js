@@ -8,6 +8,7 @@ import { LoadingSpinner } from '../components/LoadingSpinner'
 
 import { fetchAllData } from '../api/getCalls'
 import { postUpdatedStatus, deleteSelectedFile } from '../api/postCalls'
+import { MyAlert } from '../components/Alert'
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -81,11 +82,12 @@ const FileManagement = () => {
   const [showDialog, setShowDialog] = useState(false)
   const [showDialogForDelete, setShowDialogForDelete] = useState(false)
 
+  const [alert, setAlert] = useState({ type: '', message: '', isOpen: false })
   const [optionsForSelect, setOptionsForSelect] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    fetchAllData(setDatas, setIsLoading)
+    fetchAllData(setDatas, setIsLoading, setAlert)
   }, [])
 
   useEffect(() => {
@@ -109,9 +111,24 @@ const FileManagement = () => {
     setSelectedFile(value === null ? '' : value.value)
   }
 
+  const onCloseClick = (event, reason) => {
+    if (reason === 'clickaway') {
+      return
+    }
+    setAlert((prevState) => ({ ...prevState, isOpen: false }))
+  }
+
   return (
     <Grid container className={classes.root} spacing={2}>
       <LoadingSpinner loading={isLoading}>Loading data from database...</LoadingSpinner>
+
+      <MyAlert
+        open={alert.isOpen}
+        onClose={onCloseClick}
+        severity={alert.type}
+        message={alert.message}
+        autoHideDuration={5000}
+      />
 
       {!isLoading ? (
         <>

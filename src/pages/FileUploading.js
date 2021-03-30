@@ -2,16 +2,12 @@ import React, { useState } from 'react'
 import { SheetJSFT } from '../utils/types'
 import CustomizedButton from '../components/Button'
 
-import { Divider, Grid, makeStyles, Snackbar, Typography } from '@material-ui/core'
-import MuiAlert from '@material-ui/lab/Alert'
+import { Divider, Grid, makeStyles, Typography } from '@material-ui/core'
 import CloudUploadIcon from '@material-ui/icons/CloudUpload'
 
 import { postSelectedFiles } from '../api/postCalls'
 import { LoadingSpinner } from '../components/LoadingSpinner'
-
-const Alert = (props) => {
-  return <MuiAlert elevation={6} variant="filled" {...props} />
-}
+import { MyAlert } from '../components/Alert'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -102,11 +98,13 @@ const FileUploading = () => {
         Upload files
       </CustomizedButton>
 
-      <Snackbar open={alert.isOpen} autoHideDuration={5000} onClose={onCloseClick}>
-        <Alert onClose={onCloseClick} severity={alert.type}>
-          {alert.message}
-        </Alert>
-      </Snackbar>
+      <MyAlert
+        open={alert.isOpen}
+        onClose={onCloseClick}
+        severity={alert.type}
+        message={alert.message}
+        autoHideDuration={5000}
+      />
     </Grid>
   )
 }

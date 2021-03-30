@@ -12,9 +12,10 @@ import { findMax, findMin } from '../utils/chartFunctions'
 import { renderChart } from '../components/Charts/RenderFunctions'
 import { createNewChart } from '../components/Charts/Graphs'
 import { fetchCorrectData } from '../api/getCalls'
+import { LoadingSpinner } from '../components/LoadingSpinner'
 
 import '../styles/DataAnalysis.css'
-import { LoadingSpinner } from '../components/LoadingSpinner'
+import { MyAlert } from '../components/Alert'
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -99,6 +100,7 @@ const DataAnalysis = () => {
   const [isLoading, setIsLoading] = useState(true)
 
   const [showDialogForMovingAverage, setShowDialogForMovingAverage] = useState(false)
+  const [alert, setAlert] = useState({ type: '', message: '', isOpen: false })
 
   const [rozptyl, setRozptyl] = useState('')
   const [maximum, setMaximum] = useState('')
@@ -107,7 +109,7 @@ const DataAnalysis = () => {
   const [step, setStep] = useState('')
 
   useEffect(() => {
-    fetchCorrectData(setDatas, setIsLoading)
+    fetchCorrectData(setDatas, setIsLoading, setAlert)
   }, [])
 
   useEffect(() => {
@@ -343,9 +345,18 @@ const DataAnalysis = () => {
     renderMovingAverageChart('movingAverage')
   }
 
+  const onCloseClick = (event, reason) => {
+    if (reason === 'clickaway') {
+      return
+    }
+    setAlert((prevState) => ({ ...prevState, isOpen: false }))
+  }
+
   return (
     <Grid container className={classes.root} spacing={2}>
       <LoadingSpinner loading={isLoading}>Loading data from database...</LoadingSpinner>
+
+      <MyAlert isOpen={alert.isOpen} onClose={onCloseClick} severity={alert.type} message={alert.message} />
 
       {!isLoading ? (
         <>

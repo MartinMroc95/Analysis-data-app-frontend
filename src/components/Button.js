@@ -43,7 +43,7 @@ const text = {
   borderColorHover: 'rgba(192, 192, 192, 0.4)',
 }
 
-function CustomizedButton({ children, ...props }) {
+function CustomizedButton(props) {
   const [color, setColor] = useState('')
 
   const switchClassName = (key) => {
@@ -105,11 +105,7 @@ function CustomizedButton({ children, ...props }) {
 
   const classes = useStyles()
 
-  return (
-    <Button className={classes.root} onClick={props.onClick} {...props} >
-      {children}
-    </Button>
-  )
+  return <Button className={classes.root} onClick={props.onClick} {...props}/>
 }
 
 export default CustomizedButton
