@@ -23,7 +23,6 @@ export const fetchCorrectData = async (setDatas, setIsLoading) => {
       setDatas(response.data.data)
     })
     .catch((error) => {
-      // handle error
       console.log(error)
     })
     .then(() => {

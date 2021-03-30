@@ -106,7 +106,7 @@ function CustomizedButton({ children, ...props }) {
   const classes = useStyles()
 
   return (
-    <Button className={classes.root} {...props} onClick={props.onClick}>
+    <Button className={classes.root} onClick={props.onClick} {...props} >
       {children}
     </Button>
   )

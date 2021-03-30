@@ -1,27 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import CustomizedButton from '../components/Button'
-import {
-  Button,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  makeStyles,
-  Grid,
-  Divider,
-  Box,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  withStyles,
-  TableCell,
-  TableBody,
-  Paper,
-  TextField,
-} from '@material-ui/core'
+
+import { Button, Typography, Dialog, DialogTitle, DialogContent, TableContainer } from '@material-ui/core'
+import { TableHead, TableRow, withStyles, TableCell, TableBody, Paper, TextField, Table } from '@material-ui/core'
+import { DialogContentText, DialogActions, makeStyles, Grid, Divider, Box } from '@material-ui/core'
+
 import MultiSelect from 'react-multi-select-component'
 
 import { getRandomColor } from '../utils/colors'
@@ -31,6 +14,7 @@ import { createNewChart } from '../components/Charts/Graphs'
 import { fetchCorrectData } from '../api/getCalls'
 
 import '../styles/DataAnalysis.css'
+import { LoadingSpinner } from '../components/LoadingSpinner'
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -43,11 +27,9 @@ const useStyles = makeStyles(() => ({
     border: 'none',
     '& :hover ': {
       cursor: 'pointer',
-      /*  border: 'none', */
     },
     '& :active ': {
       boxShadow: 'none',
-      /*  border: 'none', */
     },
   },
   buttonStatus: { borderRadius: '2px', textTransform: 'none' },
@@ -134,7 +116,7 @@ const DataAnalysis = () => {
 
       let dataObject = {}
       for (let i = 0; i < Object.values(file).length; i++) {
-        let row = file[i] // Uloženie jedného riadku do premennej row, riadok má tlet objektu
+        let row = file[i]
         for (let key in row) {
           if (!dataObject[key]) {
             dataObject[key] = []
@@ -259,7 +241,7 @@ const DataAnalysis = () => {
     renderChart(chartModel, chart, false)
   }
 
-  // Sliding average chart
+  // Moving average chart
   const renderMovingAverageChart = (attribute) => {
     setChart((prevState) => ({ ...prevState, [attribute]: true }))
 
@@ -268,9 +250,7 @@ const DataAnalysis = () => {
 
     let pomArray = []
 
-    // Prechádzanie všetkých vybratých súborov
     for (let i = 0; i < selectedFiles.length; i++) {
-      // Počítanie hodnôt CO + CO2
       let datas = selectedFiles[i].value
       let klzavyPriemer = []
       let pomocnyArray = []
@@ -322,7 +302,6 @@ const DataAnalysis = () => {
         }
       }
 
-      // Pridávanie hodnôt do modelu
       chartModel.push({
         data: klzavyPriemer,
         label: selectedFiles[i].label,
@@ -366,39 +345,42 @@ const DataAnalysis = () => {
 
   return (
     <Grid container className={classes.root} spacing={2}>
-      <Grid item xs={12}>
-        <Typography gutterBottom style={{ fontWeight: 'bold' }}>
-          Select files from database
-        </Typography>
-        <Divider />
-      </Grid>
+      <LoadingSpinner loading={isLoading}>Loading data from database...</LoadingSpinner>
 
-      <Grid item xs={10} sm={5} md={4} lg={2} className={classes.select}>
-        <MultiSelect
-          className="multi-select"
-          isLoading={isLoading}
-          options={optionsForSelect}
-          value={selectedFiles}
-          onChange={(value) => setSelectedFiles(value)}
-        ></MultiSelect>
-      </Grid>
-
-      <Grid item xs={12} sm={12} md={8} lg={10} style={{ display: 'flex', alignItems: 'center' }}>
-        <CustomizedButton buttoncolor="primary" onClick={() => onCoCo2Click('coco2')}>
-          CO+CO2
-        </CustomizedButton>
-        <CustomizedButton buttoncolor="secondary" onClick={() => onGradientClick('gradient')}>
-          Gradient
-        </CustomizedButton>
-        <CustomizedButton buttoncolor="secondary" onClick={() => setShowDialogForMovingAverage(true)}>
-          Kĺzavý priemer
-        </CustomizedButton>
-        {chart.movingAverage ? (
-          <Button className={classes.buttonStatus} variant="outlined">
-            Step: {step}
-          </Button>
-        ) : null}
-      </Grid>
+      {!isLoading ? (
+        <>
+          <Grid item xs={12}>
+            <Typography gutterBottom style={{ fontWeight: 'bold' }}>
+              Select files from database
+            </Typography>
+            <Divider />
+          </Grid>
+          <Grid item xs={10} sm={5} md={4} lg={2} className={classes.select}>
+            <MultiSelect
+              className="multi-select"
+              options={optionsForSelect}
+              value={selectedFiles}
+              onChange={(value) => setSelectedFiles(value)}
+            ></MultiSelect>
+          </Grid>
+          <Grid item xs={12} sm={12} md={8} lg={10} style={{ display: 'flex', alignItems: 'center' }}>
+            <CustomizedButton buttoncolor="primary" onClick={() => onCoCo2Click('coco2')}>
+              CO+CO2
+            </CustomizedButton>
+            <CustomizedButton buttoncolor="secondary" onClick={() => onGradientClick('gradient')}>
+              Gradient
+            </CustomizedButton>
+            <CustomizedButton buttoncolor="secondary" onClick={() => setShowDialogForMovingAverage(true)}>
+              Kĺzavý priemer
+            </CustomizedButton>
+            {chart.movingAverage ? (
+              <Button className={classes.buttonStatus} variant="outlined">
+                Step: {step}
+              </Button>
+            ) : null}
+          </Grid>{' '}
+        </>
+      ) : null}
 
       <Grid item className={chart.coco2 ? classes.chartGrid : classes.chartGridNone}>
         <Divider style={{ width: '100%' }} />

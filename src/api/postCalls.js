@@ -1,25 +1,31 @@
 import axios from 'axios'
 
-export const postSelectedFiles = async (data, setAlertMessage, setOpenSuccesAlert, setDisabledUpload, setLoading) => {
+export const postSelectedFiles = async (data, setAlert, setDisabledUpload, setIsLoading) => {
   await axios
-    .post('http://localhost:8082/api/upload', data, {})
-    .then((res) => {
-      console.log(res.status)
-      setAlertMessage('Your files has been uploaded successfully.')
+    .post('http://localhost:8082/api/upload', data)
+    .then((response) => {
+      console.log(response)
+      if (response.data.error_code === 0) {
+        setAlert({ type: 'success', message: 'Your files has been uploaded successfully.', isOpen: true })
+        return
+      }
+      if (response.data.error_code === 1) {
+        setAlert({ type: 'error', message: 'Something went wrong! Maybe, you have chosen wrong files.', isOpen: true })
+        return
+      }
     })
-    .catch((err) => {
-      console.log(err)
+    .catch((error) => {
+      console.log(error)
     })
     .finally(() => {
-      setOpenSuccesAlert(true)
       setDisabledUpload(true)
-      setLoading(false)
+      setIsLoading(false)
     })
 }
 
 export const postUpdatedStatus = async (selectedFile, selectedStatus, setFileStatus, setShowDialog) => {
   await axios
-    .post(`http://localhost:8082/api/upload/set-status/${selectedFile._id}`, { status: selectedStatus })
+    .put(`http://localhost:8082/api/upload/set-status/${selectedFile._id}`, { status: selectedStatus })
     .then((response) => {
       console.log(response)
       setFileStatus(response.data.data.status)
@@ -34,7 +40,7 @@ export const deleteSelectedFile = async (selectedFile, setShowDialogForDelete) =
   await axios
     .post(`http://localhost:8082/api/upload/data/${selectedFile._id}`)
     .then((response) => {
-      console.log(response.status)
+      console.log(response)
       setShowDialogForDelete(true)
     })
     .catch((error) => {

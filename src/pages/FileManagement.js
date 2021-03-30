@@ -4,6 +4,7 @@ import { initCOCO2Chart } from '../components/Charts/COCO2Chart'
 import { Button, Typography, Dialog, DialogTitle, DialogContent } from '@material-ui/core'
 import { DialogContentText, DialogActions, makeStyles, Grid, Divider, Box } from '@material-ui/core'
 import CustomizedButton from '../components/Button'
+import { LoadingSpinner } from '../components/LoadingSpinner'
 
 import { fetchAllData } from '../api/getCalls'
 import { postUpdatedStatus, deleteSelectedFile } from '../api/postCalls'
@@ -104,50 +105,56 @@ const FileManagement = () => {
     deleteSelectedFile(selectedFile, setShowDialogForDelete)
   }
 
+  const onSelectClick = (value) => {
+    setSelectedFile(value === null ? '' : value.value)
+  }
+
   return (
     <Grid container className={classes.root} spacing={2}>
-      <Grid item xs={12}>
-        <Typography gutterBottom style={{ fontWeight: 'bold' }}>
-          Select file from database
-        </Typography>
-        <Divider />
-      </Grid>
+      <LoadingSpinner loading={isLoading}>Loading data from database...</LoadingSpinner>
 
-      <Grid item xs={12} sm={12} md={2} className={classes.select}>
-        <Select
-          isLoading={isLoading}
-          disabled={isLoading}
-          isClearable
-          isSearchable
-          styles={selectStyles}
-          options={optionsForSelect}
-          onChange={(value) => setSelectedFile(value === null ? '' : value.value)}
-        ></Select>
-      </Grid>
-
-      <Grid item xs={12} sm={12} md={10} style={{ display: 'flex', alignItems: 'center' }}>
-        <CustomizedButton buttoncolor="success" onClick={() => onStatusClick('Vyhovujúci')}>
-          Correct
-        </CustomizedButton>
-        <CustomizedButton buttoncolor="error" onClick={() => onStatusClick('Nevyhovujúci')}>
-          Incorrect
-        </CustomizedButton>
-        <CustomizedButton buttoncolor="remove" onClick={() => onDeleteClick()}>
-          Delete
-        </CustomizedButton>
-        <CustomizedButton buttoncolor="text" style={{ width: '190px', color: '#000018', fontWeight: 'bold' }}>
-          File status:
-          <span
-            style={
-              fileStatus === 'Vyhovujúci'
-                ? { color: 'rgba(16, 185, 129, 1)', paddingLeft: '5px', fontWeight: 'bold' }
-                : { color: 'rgba(239, 68, 68, 1)', paddingLeft: '5px', fontWeight: 'bold' }
-            }
-          >
-            {fileStatus || ''}
-          </span>
-        </CustomizedButton>
-      </Grid>
+      {!isLoading ? (
+        <>
+          <Grid item xs={12}>
+            <Typography gutterBottom style={{ fontWeight: 'bold' }}>
+              Select file from database
+            </Typography>
+            <Divider />
+          </Grid>
+          <Grid item xs={12} sm={12} md={2} className={classes.select}>
+            <Select
+              isClearable
+              isSearchable
+              styles={selectStyles}
+              options={optionsForSelect}
+              onChange={(value) => onSelectClick(value)}
+            ></Select>
+          </Grid>
+          <Grid item xs={12} sm={12} md={10} style={{ display: 'flex', alignItems: 'center' }}>
+            <CustomizedButton buttoncolor="success" onClick={() => onStatusClick('Vyhovujúci')}>
+              Correct
+            </CustomizedButton>
+            <CustomizedButton buttoncolor="error" onClick={() => onStatusClick('Nevyhovujúci')}>
+              Incorrect
+            </CustomizedButton>
+            <CustomizedButton buttoncolor="remove" onClick={() => onDeleteClick()}>
+              Delete
+            </CustomizedButton>
+            <CustomizedButton buttoncolor="text" style={{ width: '190px', color: '#000018', fontWeight: 'bold' }}>
+              File status:
+              <span
+                style={
+                  fileStatus === 'Vyhovujúci'
+                    ? { color: 'rgba(16, 185, 129, 1)', paddingLeft: '5px', fontWeight: 'bold' }
+                    : { color: 'rgba(239, 68, 68, 1)', paddingLeft: '5px', fontWeight: 'bold' }
+                }
+              >
+                {fileStatus || ''}
+              </span>
+            </CustomizedButton>
+          </Grid>
+        </>
+      ) : null}
 
       <Grid item className={classes.chartBox} style={selectedFile === '' ? { display: 'none' } : { display: 'flex' }}>
         <Box className={classes.chart}>
